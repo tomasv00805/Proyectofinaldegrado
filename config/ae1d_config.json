@@ -1,0 +1,39 @@
+{
+  "data": {
+    "output_root": "S:\\Proyecto final\\data\\ptbxl_500hz_iv1v5",
+    "dims": {
+      "T": null,
+      "C": 3
+    }
+  },
+  "training": {
+    "seed": 42,
+    "device": "auto",
+    "epochs": 25,
+    "batch_size": 64,
+    "lr": 0.0003,
+    "weight_decay": 1e-05,
+    "clip_grad": null,
+    "loss_fn": "mse"
+  },
+  "model": {
+    "in_channels": 3,
+    "base_filters": 32,
+    "leak": 0.1,
+    "kernels": [
+      11,
+      7,
+      9,
+      11
+    ]
+  },
+  "threshold": {
+    "use_mean_std": false,
+    "k_std": 3.0,
+    "percentile": 98.0
+  },
+  "mlflow": {
+    "experiment_name": "ptbxl_ae_1dcnn_iv1v5",
+    "tracking_uri": null
+  }
+}
