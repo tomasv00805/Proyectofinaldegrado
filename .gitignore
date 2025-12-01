@@ -106,6 +106,14 @@ desktop.ini
 !LICENSE*.txt
 !requirements.txt
 
+# Documentación detallada del frontend (mantener localmente, no en git)
+Frontend/INICIO_RAPIDO.md
+Frontend/INSTRUCCIONES_AWS.md
+Frontend/ORIGEN_DATOS_ECG.md
+Frontend/SOLUCION_CORS_HTTP_API.md
+Frontend/TROUBLESHOOTING.md
+Frontend/VERIFICAR_INTEGRACION.md
+
 # Node.js
 node_modules/
 npm-debug.log*
