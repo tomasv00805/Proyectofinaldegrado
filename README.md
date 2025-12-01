@@ -4,20 +4,21 @@ Sistema completo para el análisis de señales ECG utilizando modelos de deep le
 
 ## 📋 Características Principales
 
-- **Procesamiento de señales ECG**: Filtrado, normalización, downsampling, selección de leads
+- **Procesamiento de señales ECG**: Filtrado, normalización, downsampling, selección de leads (I, II, III)
 - **Múltiples arquitecturas de modelos**: CNN1D, CNN1D+LSTM, CNN1D+Transformer, Autoencoders
 - **Datos supervisados y no supervisados**: Pipelines completos para ambos enfoques
 - **Despliegue en producción**: AWS SageMaker Serverless + Lambda + API Gateway
-- **Frontend interactivo**: Aplicación React + Vite para demo y pruebas
-- **Tracking de experimentos**: Integración con MLflow
+- **Frontend interactivo**: Aplicación React + Vite para demo y pruebas en tiempo real
+- **Tracking de experimentos**: Integración con MLflow para seguimiento de entrenamientos
 - **Análisis comparativo**: Comparación de costos computacionales entre modelos
+- **Pipeline completo**: Desde datos crudos hasta modelo en producción
 
 ## 🚀 Inicio Rápido
 
 ### Requisitos Previos
 
 - **Python 3.8+** para el backend/ML
-- **Node.js 18+** para el frontend
+- **Node.js 18+** para el frontend (opcional)
 - **CUDA 12.8+** (opcional, para aceleración GPU)
 - **Cuenta AWS** (para despliegue en producción)
 - **Git**
@@ -54,12 +55,12 @@ pip install torch torchvision --index-url https://download.pytorch.org/whl/cu128
 pip install torch torchvision
 ```
 
-4. **Configurar frontend:**
+4. **Configurar frontend (opcional):**
 ```bash
 cd Frontend
 npm install
 cp .env.example .env
-# Editar .env y agregar tu URL de API Gateway
+# Editar .env y agregar tu URL de API Gateway cuando esté configurada
 ```
 
 ## 📁 Estructura del Proyecto
@@ -70,17 +71,18 @@ Proyectofinaldegrado/
 │   ├── build_supervised_ecg_dataset.py      # Pipeline datos supervisados
 │   ├── build_unsupervised_ecg_dataset.ipynb  # Pipeline datos no supervisados
 │   ├── cnn1d_classification_supervised.ipynb
-│   ├── cnn1d_lstm_classification_supervised.ipynb
+│   ├── cnn1d_lstm_classification_supervised.ipynb ⭐
 │   ├── cnn1d_transformer_classification_supervised.ipynb
 │   ├── cnn1d_autoencoder_anomaly_detection.ipynb
+│   ├── cnn1d_lstm_autoencoder_anomaly_detection.ipynb ⭐
 │   ├── lstm_autoencoder_pipeline.ipynb
 │   ├── deploy_sagemaker_serverless.ipynb    # Despliegue en AWS
 │   ├── evaluation_threshold_tuning.py       # Evaluación de modelos
 │   ├── ecg_preprocessing.py                 # Funciones de preprocesamiento
-│   ├── models/                              # Metadatos de modelos
-│   ├── sagemaker_models/                    # Modelos para SageMaker
-│   ├── DOCUMENTACION_*.md                   # Documentación técnica
-│   └── README_NOTEBOOKS.md                  # Guía de notebooks
+│   ├── models/                              # Metadatos de modelos entrenados
+│   ├── sagemaker_models/                    # Modelos preparados para SageMaker
+│   ├── DOCUMENTACION_*.md                   # Documentación técnica completa
+│   └── README_NOTEBOOKS.md                  # Guía detallada de notebooks
 │
 ├── Frontend/                       # Aplicación web React
 │   ├── src/
@@ -134,12 +136,13 @@ jupyter notebook build_unsupervised_ecg_dataset.ipynb
 
 ### 2. Entrenar Modelos
 
-**Clasificación Supervisada:**
+**Clasificación Supervisada (Recomendado):**
+- `cnn1d_lstm_classification_supervised.ipynb` ⭐ - CNN1D + LSTM (mejor rendimiento)
 - `cnn1d_classification_supervised.ipynb` - CNN1D puro
-- `cnn1d_lstm_classification_supervised.ipynb` - CNN1D + LSTM
 - `cnn1d_transformer_classification_supervised.ipynb` - CNN1D + Transformer
 
-**Detección de Anomalías (No Supervisado):**
+**Detección de Anomalías - No Supervisado (Recomendado):**
+- `cnn1d_lstm_autoencoder_anomaly_detection.ipynb` ⭐ - Autoencoder CNN1D + LSTM
 - `cnn1d_autoencoder_anomaly_detection.ipynb` - Autoencoder CNN1D
 - `lstm_autoencoder_pipeline.ipynb` - Autoencoder LSTM
 
@@ -161,7 +164,7 @@ Ver la guía completa en `Books/deploy_sagemaker_serverless.ipynb` o `Books/DOCU
 **Pasos principales:**
 1. Preparar modelo para SageMaker
 2. Crear endpoint serverless en SageMaker
-3. Configurar Lambda function
+3. Configurar Lambda function (`Frontend/lambda_function.py`)
 4. Crear API Gateway HTTP API
 5. Configurar CORS
 
@@ -186,61 +189,63 @@ Ver `Frontend/README.md` para más detalles.
 
 ### Clasificación Supervisada
 
-1. **CNN1D**: Red convolucional 1D pura
-2. **CNN1D + LSTM**: Convolución seguida de capas LSTM
-3. **CNN1D + Transformer**: Convolución con atención Transformer
+1. **CNN1D**: Red convolucional 1D pura para extracción de características
+2. **CNN1D + LSTM**: Convolución seguida de capas LSTM para capturar dependencias temporales
+3. **CNN1D + Transformer**: Convolución con atención Transformer para relaciones de largo alcance
 
 ### Detección de Anomalías (No Supervisado)
 
-1. **Autoencoder CNN1D**: Encoder-decoder convolucional
-2. **Autoencoder LSTM**: Encoder-decoder con LSTM
+1. **Autoencoder CNN1D**: Encoder-decoder convolucional para reconstrucción
+2. **Autoencoder LSTM**: Encoder-decoder con LSTM para secuencias temporales
+3. **Autoencoder CNN1D + LSTM**: Arquitectura híbrida (recomendada)
 
 ### Formato de Entrada
 - **Forma**: `[batch_size, 2000, 3]`
   - 2000 muestras temporales (10 segundos a 200 Hz)
   - 3 canales (I, II, III)
-- **Frecuencia**: 200 Hz
+- **Frecuencia**: 200 Hz (downsampled desde 500 Hz)
 - **Duración**: 10 segundos
+- **Normalización**: Z-score por canal
 
 ## 🛠️ Tecnologías Utilizadas
 
 ### Backend/ML
-- **PyTorch**: Deep learning
-- **NumPy, Pandas**: Manipulación de datos
+- **PyTorch**: Framework de deep learning
+- **NumPy, Pandas**: Manipulación y análisis de datos
 - **SciPy, WFDB**: Procesamiento de señales ECG
-- **Scikit-learn**: Métricas y validación
-- **MLflow**: Tracking de experimentos
-- **Prefect**: Orquestación de pipelines
+- **Scikit-learn**: Métricas, validación y evaluación
+- **MLflow**: Tracking de experimentos y versionado de modelos
+- **Prefect**: Orquestación de pipelines de datos
 
 ### Frontend
-- **React 18**: Framework UI
-- **Vite**: Build tool y dev server
+- **React 18**: Framework UI moderno
+- **Vite**: Build tool rápido y dev server
 - **JavaScript/JSX**: Lenguaje principal
 
 ### Despliegue
-- **AWS SageMaker**: Servicio de ML
-- **AWS Lambda**: Función serverless
-- **API Gateway**: API HTTP
-- **IAM**: Gestión de permisos
+- **AWS SageMaker**: Servicio de ML para endpoints serverless
+- **AWS Lambda**: Función serverless como proxy
+- **API Gateway**: API HTTP para exponer el modelo
+- **IAM**: Gestión de permisos y seguridad
 
 ## 📚 Documentación
 
 ### Documentación General
-- `Books/DOCUMENTACION_GENERAL.md` - Visión general del proyecto
+- `Books/DOCUMENTACION_GENERAL.md` - Visión general completa del proyecto
 - `Books/README.md` - Guía del backend/ML
-- `Books/README_NOTEBOOKS.md` - Descripción de todos los notebooks
+- `Books/README_NOTEBOOKS.md` - Descripción detallada de todos los notebooks
 
 ### Documentación de Datos
-- `Books/Documentacion Datos Supervisados.md` - Pipeline de datos supervisados
-- `Books/DOCUMENTACION_DATOS_NO_SUPERVISADOS_DOWNSAMPLING.md` - Datos no supervisados
+- `Books/Documentacion Datos Supervisados.md` - Pipeline completo de datos supervisados
+- `Books/DOCUMENTACION_DATOS_NO_SUPERVISADOS_DOWNSAMPLING.md` - Datos no supervisados y downsampling
 
 ### Documentación de Entrenamiento
-- `Books/DOCUMENTACION_ENTRENAMIENTO.md` - Proceso de entrenamiento
+- `Books/DOCUMENTACION_ENTRENAMIENTO.md` - Proceso de entrenamiento, arquitecturas y MLflow
 
 ### Documentación de Despliegue
-- `Books/DOCUMENTACION_DESPLIEGUE_SAGEMAKER.md` - Guía completa de despliegue
+- `Books/DOCUMENTACION_DESPLIEGUE_SAGEMAKER.md` - Guía completa de despliegue en AWS
 - `Frontend/README.md` - Documentación del frontend
-- `Frontend/DOCUMENTACION_COMPLETA.md` - Documentación técnica del frontend
+- `Frontend/DOCUMENTACION_COMPLETA.md` - Documentación técnica completa del frontend
 
 ## 🔐 Seguridad
 
@@ -248,24 +253,36 @@ Ver `Frontend/README.md` para más detalles.
 - ✅ **API Gateway como proxy**: Todas las peticiones pasan por API Gateway
 - ✅ **CORS configurado**: Control de acceso desde el frontend
 - ✅ **Variables de entorno**: Configuración sensible en `.env` (no en repo)
+- ✅ **Validación de entrada**: Validación de datos en Lambda antes de invocar SageMaker
 
 ## 📝 Notas Importantes
 
-- Los **datasets originales** y **modelos entrenados** no están en el repositorio (tamaño)
-- Los datos procesados se guardan en `data/`
-- Los artefactos de MLflow se guardan en `mlflow_artifacts/` y `mlflow.db`
-- Para usar GPU, asegúrate de tener drivers NVIDIA y CUDA instalados
+- Los **datasets originales** y **modelos entrenados** no están en el repositorio debido a su tamaño
+- Los datos procesados se guardan en `data/` (no incluido en repo)
+- Los artefactos de MLflow se guardan en `mlflow_artifacts/` y `mlflow.db` (no incluidos)
+- Para usar GPU, asegúrate de tener drivers NVIDIA y CUDA instalados correctamente
 - El frontend requiere configuración de API Gateway para funcionar (ver `Frontend/README.md`)
+- Los datasets PTB-XL y MIMIC-IV-ECG requieren registro en PhysioNet
 
 ## 📊 Resultados y Métricas
 
 Los modelos se evalúan con:
-- Accuracy, Precision, Recall, F1-Score
-- ROC-AUC, PR-AUC
-- Matrices de confusión
-- Análisis de costos computacionales
+- **Métricas de clasificación**: Accuracy, Precision, Recall, F1-Score
+- **Métricas de ranking**: ROC-AUC, PR-AUC
+- **Visualizaciones**: Matrices de confusión, curvas ROC/PR
+- **Análisis de costos**: Comparación de costos computacionales entre modelos
 
 Ver `Books/computational_cost_comparison/` para comparaciones detalladas.
+
+## 🎯 Modelos Recomendados
+
+Para **clasificación supervisada**: `cnn1d_lstm_classification_supervised.ipynb` ⭐
+- Mejor balance entre rendimiento y costo computacional
+- Arquitectura CNN1D + LSTM
+
+Para **detección de anomalías**: `cnn1d_lstm_autoencoder_anomaly_detection.ipynb` ⭐
+- Autoencoder híbrido CNN1D + LSTM
+- Buen rendimiento en detección de anomalías
 
 ## 🤝 Contribuciones
 
