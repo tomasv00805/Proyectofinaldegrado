@@ -1,0 +1,33 @@
+{
+  "model_type": "CNN1D_Classifier",
+  "run_name": "cnn1d_ecg_v1",
+  "experiment_name": "CNN1D_ECG_Supervisado_v1",
+  "date": "2025-11-24 22:28:39.331290",
+  "model_config": {
+    "n_channels": 3,
+    "seq_len": 2000,
+    "out_channels_list": [
+      32,
+      64,
+      128
+    ],
+    "kernel_sizes": [
+      7,
+      5,
+      3
+    ],
+    "pool_sizes": [
+      2,
+      2,
+      2
+    ],
+    "use_batchnorm": true,
+    "cnn_activation": "relu",
+    "fc_units": 64
+  },
+  "training_config": {
+    "batch_size": 128,
+    "learning_rate": 0.001,
+    "num_epochs": 30
+  }
+}

@@ -38,8 +38,8 @@ ENV/
 .ipynb_checkpoints/
 *.ipynb_checkpoints
 
-# Datasets y datos grandes
-data/
+# Datasets y datos grandes (solo el directorio data/ en la raíz)
+/data/
 *.npy
 *.npz
 *.dat
@@ -48,6 +48,9 @@ data/
 !config/*.csv
 *.h5
 *.hdf5
+
+# Permitir ejemplos de ECG para demo del frontend
+!Frontend/src/data/ecg_samples.json
 
 # Modelos entrenados
 *.pt
@@ -58,6 +61,7 @@ data/
 *.pb
 *.onnx
 *.tflite
+*.tar.gz
 
 # MLflow
 mlflow.db
@@ -101,3 +105,21 @@ desktop.ini
 !LICENSE*.txt
 !requirements.txt
 
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# JSON grandes con datos (permitir ejemplos de ECG para demo)
+Frontend/src/data/*.json
+!Frontend/src/data/ecg_samples.json
+
+# Permitir archivos de configuración JSON necesarios
+!package.json
+!package-lock.json
+!tsconfig.json
+!*.config.json
+!Books/*.json
+!config/*.json
