@@ -1,157 +1,281 @@
-# Proyecto Final de Grado - Análisis de ECG con Autoencoders
+# 🫀 Proyecto Final de Grado - Análisis de ECG con Deep Learning
 
-Este proyecto implementa un sistema completo para el análisis de señales ECG utilizando autoencoders 1D CNN para la detección de anomalías. El sistema procesa datos de los datasets PTB-XL y MIMIC-IV-ECG, aplica filtrado y normalización, y entrena modelos de deep learning para clasificación binaria (NORMAL vs ANÓMALO).
+Sistema completo para el análisis de señales ECG utilizando modelos de deep learning para la detección de anomalías. El proyecto incluye procesamiento de datos, entrenamiento de múltiples arquitecturas (CNN1D, LSTM, Transformer), despliegue en AWS SageMaker, y un frontend React para interactuar con el modelo.
 
-## 📋 Requisitos Previos
+## 📋 Características Principales
 
-- Python 3.8 o superior
-- CUDA 12.8+ (opcional, para aceleración GPU con PyTorch)
-- Git
+- **Procesamiento de señales ECG**: Filtrado, normalización, downsampling, selección de leads
+- **Múltiples arquitecturas de modelos**: CNN1D, CNN1D+LSTM, CNN1D+Transformer, Autoencoders
+- **Datos supervisados y no supervisados**: Pipelines completos para ambos enfoques
+- **Despliegue en producción**: AWS SageMaker Serverless + Lambda + API Gateway
+- **Frontend interactivo**: Aplicación React + Vite para demo y pruebas
+- **Tracking de experimentos**: Integración con MLflow
+- **Análisis comparativo**: Comparación de costos computacionales entre modelos
 
-## 🚀 Instalación
+## 🚀 Inicio Rápido
 
-### 1. Clonar el repositorio
+### Requisitos Previos
 
+- **Python 3.8+** para el backend/ML
+- **Node.js 18+** para el frontend
+- **CUDA 12.8+** (opcional, para aceleración GPU)
+- **Cuenta AWS** (para despliegue en producción)
+- **Git**
+
+### Instalación
+
+1. **Clonar el repositorio:**
 ```bash
 git clone https://github.com/tomasv00805/Proyectofinaldegrado.git
 cd Proyectofinaldegrado
 ```
 
-### 2. Crear un entorno virtual (recomendado)
-
-**Windows:**
+2. **Configurar entorno Python:**
 ```bash
+# Crear entorno virtual
 python -m venv venv
+
+# Activar (Windows)
 venv\Scripts\activate
-```
-
-**Linux/Mac:**
-```bash
-python3 -m venv venv
+# Activar (Linux/Mac)
 source venv/bin/activate
-```
 
-### 3. Instalar dependencias
-
-```bash
+# Instalar dependencias
 pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-### 4. Instalación de PyTorch con CUDA (opcional, para GPU)
-
-Si tienes una GPU NVIDIA y quieres usar CUDA, instala PyTorch con soporte CUDA:
-
-**Para CUDA 12.8:**
+3. **Instalar PyTorch con CUDA (opcional):**
 ```bash
+# CUDA 12.8
 pip install torch torchvision --index-url https://download.pytorch.org/whl/cu128
-```
 
-**Para CUDA 11.8:**
-```bash
-pip install torch torchvision --index-url https://download.pytorch.org/whl/cu118
-```
-
-**Solo CPU:**
-```bash
+# Solo CPU
 pip install torch torchvision
+```
+
+4. **Configurar frontend:**
+```bash
+cd Frontend
+npm install
+cp .env.example .env
+# Editar .env y agregar tu URL de API Gateway
 ```
 
 ## 📁 Estructura del Proyecto
 
 ```
 Proyectofinaldegrado/
-├── Books/                          # Scripts y notebooks principales
-│   ├── supervised_ecg_pipeline.py  # Pipeline principal de procesamiento
-│   ├── supervised_ecg_pipeline_fast.py  # Versión optimizada paralela
-│   ├── build_supervised_ecg_dataset.py  # Script para construir dataset
-│   ├── evaluation_threshold_tuning.py   # Evaluación y búsqueda de umbral
-│   ├── ecg_preprocessing.py        # Funciones de preprocesamiento
-│   └── *.ipynb                     # Notebooks de Jupyter
-├── config/                         # Archivos de configuración
-│   └── ae1d_config.json           # Configuración del autoencoder
-├── data/                           # Datos procesados (no incluido en repo)
-│   └── Datos_supervisados/        # Dataset final preparado
+├── Books/                          # Scripts y notebooks de ML
+│   ├── build_supervised_ecg_dataset.py      # Pipeline datos supervisados
+│   ├── build_unsupervised_ecg_dataset.ipynb  # Pipeline datos no supervisados
+│   ├── cnn1d_classification_supervised.ipynb
+│   ├── cnn1d_lstm_classification_supervised.ipynb
+│   ├── cnn1d_transformer_classification_supervised.ipynb
+│   ├── cnn1d_autoencoder_anomaly_detection.ipynb
+│   ├── lstm_autoencoder_pipeline.ipynb
+│   ├── deploy_sagemaker_serverless.ipynb    # Despliegue en AWS
+│   ├── evaluation_threshold_tuning.py       # Evaluación de modelos
+│   ├── ecg_preprocessing.py                 # Funciones de preprocesamiento
+│   ├── models/                              # Metadatos de modelos
+│   ├── sagemaker_models/                    # Modelos para SageMaker
+│   ├── DOCUMENTACION_*.md                   # Documentación técnica
+│   └── README_NOTEBOOKS.md                  # Guía de notebooks
+│
+├── Frontend/                       # Aplicación web React
+│   ├── src/
+│   │   ├── App.jsx                 # Componente principal
+│   │   ├── ECGVisualization.jsx    # Visualización de señales ECG
+│   │   ├── api/client.js           # Cliente API Gateway
+│   │   └── data/ecg_samples.json   # Ejemplos de ECG para demo
+│   ├── lambda_function.py          # Función Lambda para AWS
+│   ├── generate_ecg_samples.py     # Generar ejemplos de ECG
+│   ├── package.json
+│   ├── vite.config.js
+│   └── README.md                   # Documentación del frontend
+│
+├── config/                         # Configuraciones
+│   └── ae1d_config.json           # Configuración autoencoder
+│
+├── data/                           # Datos procesados (no en repo)
+│   ├── Datos_supervisados/        # Datasets supervisados
+│   └── Datos_no_supervisados/     # Datasets no supervisados
+│
 ├── requirements.txt                # Dependencias Python
 └── README.md                       # Este archivo
 ```
 
 ## 🔧 Uso
 
-### Preparar el Dataset
+### 1. Preparar los Datos
 
-1. **Descargar los datasets originales:**
-   - PTB-XL: https://physionet.org/content/ptb-xl/1.0.3/
-   - MIMIC-IV-ECG: https://physionet.org/content/mimic-iv-ecg-diagnostic/1.0/
+**Descargar datasets:**
+- PTB-XL: https://physionet.org/content/ptb-xl/1.0.3/
+- MIMIC-IV-ECG: https://physionet.org/content/mimic-iv-ecg-diagnostic/1.0/
 
-2. **Colocar los datasets en el directorio raíz:**
-   - `ptb-xl-a-large-publicly-available-electrocardiography-dataset-1.0.3/`
-   - `mimic-iv-ecg-diagnostic-electrocardiogram-matched-subset-1.0/`
+**Colocar en el directorio raíz:**
+```
+ptb-xl-a-large-publicly-available-electrocardiogram-dataset-1.0.3/
+mimic-iv-ecg-diagnostic-electrocardiogram-matched-subset-1.0/
+```
 
-3. **Ejecutar el pipeline de construcción del dataset:**
-
+**Procesar datos supervisados:**
 ```bash
 cd Books
 python build_supervised_ecg_dataset.py
-```
-
-O usar el notebook interactivo:
-```bash
+# O usar el notebook interactivo:
 jupyter notebook build_supervised_ecg_dataset.ipynb
 ```
 
-### Entrenar el Modelo
-
-Abre el notebook principal de entrenamiento:
-
+**Procesar datos no supervisados:**
 ```bash
-jupyter notebook Books/d1CNN_AE_pipeline.ipynb
+jupyter notebook build_unsupervised_ecg_dataset.ipynb
 ```
 
-El notebook incluye:
-- Configuración de hiperparámetros
-- Carga de datos
-- Definición del modelo Autoencoder 1D CNN
-- Entrenamiento con MLflow y Prefect
-- Evaluación y búsqueda de umbral óptimo
+### 2. Entrenar Modelos
 
-### Evaluar el Modelo
+**Clasificación Supervisada:**
+- `cnn1d_classification_supervised.ipynb` - CNN1D puro
+- `cnn1d_lstm_classification_supervised.ipynb` - CNN1D + LSTM
+- `cnn1d_transformer_classification_supervised.ipynb` - CNN1D + Transformer
 
-Usa el script de evaluación:
+**Detección de Anomalías (No Supervisado):**
+- `cnn1d_autoencoder_anomaly_detection.ipynb` - Autoencoder CNN1D
+- `lstm_autoencoder_pipeline.ipynb` - Autoencoder LSTM
+
+**Comparar modelos:**
+```bash
+jupyter notebook compare_models_computational_cost.ipynb
+```
+
+### 3. Evaluar Modelos
 
 ```bash
 python Books/evaluation_threshold_tuning.py
 ```
 
-## 📊 Características Principales
+### 4. Desplegar en AWS
 
-- **Procesamiento de señales ECG**: Filtrado, normalización, selección de leads (II, V1, V5)
-- **Etiquetado automático**: Clasificación binaria NORMAL vs ANÓMALO basada en diagnósticos
-- **Balanceo de datos**: Generación de datasets balanceados
-- **Splits estratificados**: Train/Val/Test (70/15/15) + 10 folds para validación cruzada
-- **Autoencoder 1D CNN**: Arquitectura profunda para detección de anomalías
-- **Tracking de experimentos**: Integración con MLflow para logging y artefactos
-- **Optimización de umbral**: Búsqueda automática del umbral óptimo para clasificación
+Ver la guía completa en `Books/deploy_sagemaker_serverless.ipynb` o `Books/DOCUMENTACION_DESPLIEGUE_SAGEMAKER.md`
 
-## 🛠️ Dependencias Principales
+**Pasos principales:**
+1. Preparar modelo para SageMaker
+2. Crear endpoint serverless en SageMaker
+3. Configurar Lambda function
+4. Crear API Gateway HTTP API
+5. Configurar CORS
 
-- **numpy, pandas**: Manipulación de datos
-- **scipy, wfdb**: Procesamiento de señales ECG
-- **scikit-learn**: Métricas y validación
-- **torch**: Deep learning (PyTorch)
-- **mlflow**: Tracking de experimentos
-- **prefect**: Orquestación de pipelines
-- **matplotlib**: Visualización
-- **jupyter**: Notebooks interactivos
+### 5. Usar el Frontend
 
-Ver `requirements.txt` para la lista completa con versiones.
+```bash
+cd Frontend
+npm install
+npm run dev
+```
+
+Abre `http://localhost:5173` en tu navegador.
+
+**Configurar API Gateway:**
+1. Crea `.env` desde `.env.example`
+2. Agrega tu URL de API Gateway: `VITE_API_URL=https://tu-api.execute-api.us-east-1.amazonaws.com`
+3. Reinicia el servidor de desarrollo
+
+Ver `Frontend/README.md` para más detalles.
+
+## 📊 Arquitecturas de Modelos
+
+### Clasificación Supervisada
+
+1. **CNN1D**: Red convolucional 1D pura
+2. **CNN1D + LSTM**: Convolución seguida de capas LSTM
+3. **CNN1D + Transformer**: Convolución con atención Transformer
+
+### Detección de Anomalías (No Supervisado)
+
+1. **Autoencoder CNN1D**: Encoder-decoder convolucional
+2. **Autoencoder LSTM**: Encoder-decoder con LSTM
+
+### Formato de Entrada
+- **Forma**: `[batch_size, 2000, 3]`
+  - 2000 muestras temporales (10 segundos a 200 Hz)
+  - 3 canales (I, II, III)
+- **Frecuencia**: 200 Hz
+- **Duración**: 10 segundos
+
+## 🛠️ Tecnologías Utilizadas
+
+### Backend/ML
+- **PyTorch**: Deep learning
+- **NumPy, Pandas**: Manipulación de datos
+- **SciPy, WFDB**: Procesamiento de señales ECG
+- **Scikit-learn**: Métricas y validación
+- **MLflow**: Tracking de experimentos
+- **Prefect**: Orquestación de pipelines
+
+### Frontend
+- **React 18**: Framework UI
+- **Vite**: Build tool y dev server
+- **JavaScript/JSX**: Lenguaje principal
+
+### Despliegue
+- **AWS SageMaker**: Servicio de ML
+- **AWS Lambda**: Función serverless
+- **API Gateway**: API HTTP
+- **IAM**: Gestión de permisos
+
+## 📚 Documentación
+
+### Documentación General
+- `Books/DOCUMENTACION_GENERAL.md` - Visión general del proyecto
+- `Books/README.md` - Guía del backend/ML
+- `Books/README_NOTEBOOKS.md` - Descripción de todos los notebooks
+
+### Documentación de Datos
+- `Books/Documentacion Datos Supervisados.md` - Pipeline de datos supervisados
+- `Books/DOCUMENTACION_DATOS_NO_SUPERVISADOS_DOWNSAMPLING.md` - Datos no supervisados
+
+### Documentación de Entrenamiento
+- `Books/DOCUMENTACION_ENTRENAMIENTO.md` - Proceso de entrenamiento
+
+### Documentación de Despliegue
+- `Books/DOCUMENTACION_DESPLIEGUE_SAGEMAKER.md` - Guía completa de despliegue
+- `Frontend/README.md` - Documentación del frontend
+- `Frontend/DOCUMENTACION_COMPLETA.md` - Documentación técnica del frontend
+
+## 🔐 Seguridad
+
+- ✅ **Sin credenciales expuestas**: Las credenciales AWS se manejan mediante IAM roles
+- ✅ **API Gateway como proxy**: Todas las peticiones pasan por API Gateway
+- ✅ **CORS configurado**: Control de acceso desde el frontend
+- ✅ **Variables de entorno**: Configuración sensible en `.env` (no en repo)
 
 ## 📝 Notas Importantes
 
-- Los **datasets originales** y los **modelos entrenados** no están incluidos en el repositorio debido a su tamaño
-- Los datos procesados se guardan en `data/Datos_supervisados/`
+- Los **datasets originales** y **modelos entrenados** no están en el repositorio (tamaño)
+- Los datos procesados se guardan en `data/`
 - Los artefactos de MLflow se guardan en `mlflow_artifacts/` y `mlflow.db`
-- Para usar GPU, asegúrate de tener los drivers NVIDIA y CUDA instalados correctamente
+- Para usar GPU, asegúrate de tener drivers NVIDIA y CUDA instalados
+- El frontend requiere configuración de API Gateway para funcionar
+
+## 🚀 Despliegue del Frontend
+
+El frontend puede desplegarse en:
+- **Vercel** (recomendado)
+- **Netlify**
+- **AWS Amplify**
+- **GitHub Pages**
+
+Ver `Frontend/README.md` para instrucciones de despliegue.
+
+## 📊 Resultados y Métricas
+
+Los modelos se evalúan con:
+- Accuracy, Precision, Recall, F1-Score
+- ROC-AUC, PR-AUC
+- Matrices de confusión
+- Análisis de costos computacionales
+
+Ver `Books/computational_cost_comparison/` para comparaciones detalladas.
 
 ## 🤝 Contribuciones
 
@@ -163,7 +287,7 @@ Este proyecto utiliza datasets públicos (PTB-XL y MIMIC-IV-ECG) que tienen sus 
 
 ## 👤 Autor
 
-Tomas V00805
+**Tomas V00805**
 
 ## 📧 Contacto
 
@@ -172,4 +296,3 @@ Para preguntas sobre el proyecto, abre un issue en GitHub.
 ---
 
 **Nota**: Este proyecto requiere acceso a los datasets PTB-XL y MIMIC-IV-ECG, que deben descargarse por separado desde PhysioNet (requiere registro y aceptación de términos de uso).
-
