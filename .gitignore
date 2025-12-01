@@ -98,6 +98,7 @@ desktop.ini
 # Archivos de resultados
 *.pdf
 *.html
+!Frontend/index.html
 
 # Archivos de texto grandes
 *.txt
