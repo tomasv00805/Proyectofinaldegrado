@@ -255,17 +255,7 @@ Ver `Frontend/README.md` para más detalles.
 - Los datos procesados se guardan en `data/`
 - Los artefactos de MLflow se guardan en `mlflow_artifacts/` y `mlflow.db`
 - Para usar GPU, asegúrate de tener drivers NVIDIA y CUDA instalados
-- El frontend requiere configuración de API Gateway para funcionar
-
-## 🚀 Despliegue del Frontend
-
-El frontend puede desplegarse en:
-- **Vercel** (recomendado)
-- **Netlify**
-- **AWS Amplify**
-- **GitHub Pages**
-
-Ver `Frontend/README.md` para instrucciones de despliegue.
+- El frontend requiere configuración de API Gateway para funcionar (ver `Frontend/README.md`)
 
 ## 📊 Resultados y Métricas
 
